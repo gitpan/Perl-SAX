@@ -61,7 +61,7 @@ METHODS
 TO DO
     Design and create the PerlML Schema
 
-    Complete the "parse" method
+    Make any changes needed to conform to it
 
     Write a bunch of tests
 

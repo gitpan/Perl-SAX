@@ -17,10 +17,29 @@ BEGIN {
 	}
 }
 
-use Test::More tests => 1;
+use Test::More tests => 5;
+use PPI       ();
 use Perl::SAX ();
 
+use vars qw{$TESTDIR};
+BEGIN {
+	$TESTDIR = 't.data';
+}
+
 # Create a new, default, object
-isa_ok( Perl::SAX->new, 'Perl::SAX' );
+my $Driver = Perl::SAX->new;
+isa_ok( $Driver, 'Perl::SAX' );
+
+# Load the test document
+my $Document = PPI::Document->load( catfile($TESTDIR, '01_tiny.perl') );
+isa_ok( $Document, 'PPI::Document' );
+
+# Do the parsing
+ok( $Driver->parse( $Document ), '->parse returns true' );
+
+# Get the results
+my $Output = $Driver->{Output};
+ok( ref $Output eq 'SCALAR', 'SCALAR output found' );
+is( length $$Output, 459, 'Output is the correct length' );
 
 exit(0);

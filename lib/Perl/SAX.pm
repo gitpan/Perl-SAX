@@ -55,20 +55,20 @@ use Class::Autouse 'XML::SAX::Writer';
 
 use vars qw{$VERSION};
 BEGIN {
-	$VERSION = '0.01';
+	$VERSION = '0.03';
 }
 
 # While in development, use a version-specific namespace.
 # In theory, this ensures documents are only truly valid with the
 # version they were created with.
-use constant XMLNS => "http://ali.as/xml/schema/devel/PerlML-$VERSION";
+use constant XMLNS => "http://ali.as/xml/schema/experimental/perlml/$VERSION/";
 
 
 
 
 
 #####################################################################
-# Constructor and Miscellaneous
+# Constructor and Accessors
 
 =pod
 
@@ -101,8 +101,9 @@ sub new {
 
 	# Create the empty object
 	my $self = bless {
-		Root    => undef,
-		Handler => undef,
+		NamespaceURI => '',
+		Prefix       => '',
+		Handler      => undef,
 		}, $class;
 
 	# Have we been passed a custom handler?
@@ -123,14 +124,30 @@ sub new {
 		$self->{Handler} = XML::SAX::Writer->new( Output => $self->{Output} ) or return undef;
 	}
 
+	# Generate NamespaceURI information?
+	if ( $params{NamespaceURI} ) {
+		if ( length $params{NamespaceURI} > 1 ) {
+			# Custom namespace
+			$self->{NamespaceURI} = $params{NamespaceURI};
+		} else {
+			# Default namespace
+			$self->{NamespaceURI} = XMLNS;
+		}
+	}
+
+	# Use a prefix?
+	if ( $params{Prefix} ) {
+		$self->{Prefix} = $params{Prefix};
+	}
+
 	$self;
 }
 
-# Prevent use as a SAX Filter.
-# We only generate SAX events, we don't consume them.
-sub start_document {
-	die "Perl::SAX can only be used as a SAX Driver, it does not accept SAX events";
-}
+sub NamespaceURI { $_[0]->{NamespaceURI} }
+sub Prefix       { $_[0]->{Prefix}       }
+sub Handler      { $_[0]->{Handler}      }
+sub Output       { $_[0]->{Output}       }
+
 
 
 
@@ -138,9 +155,180 @@ sub start_document {
 #####################################################################
 # Main Methods
 
-sub parse {
-	die "->parse has not been implemented yet";
+# Prevent use as a SAX Filter.
+# We only generate SAX events, we don't consume them.
+sub start_document {
+	my $class = ref $_[0] || $_[0];
+	die "$class can only be used as a SAX Driver";
 }
+
+sub parse {
+	my $self     = shift;
+	my $Document = isa(ref $_[0], 'PPI::Document') ? shift : return undef;
+
+	# Generate the SAX2 events
+	$self->SUPER::start_document( {} );
+	$self->_parse_document( $Document ) or return undef;
+	$self->SUPER::end_document( {} );
+
+	1;
+}
+
+sub _parse {
+	my $self    = shift;
+	my $Element = isa(ref $_[0], 'PPI::Element') ? shift : return undef;
+
+	# Split to the various generic handlers
+	  isa($Element, 'PPI::Token')     ? $self->_parse_token( $Element )
+	: isa($Element, 'PPI::Statement') ? $self->_parse_statement( $Element )
+	: isa($Element, 'PPI::Structure') ? $self->_parse_structure( $Element )
+	: undef;
+}
+
+sub _parse_document {
+	my $self     = shift;
+	my $Document = isa(ref $_[0], 'PPI::Document') ? shift : return undef;
+
+	# Generate the SAX2 events
+	my $Element = $self->_element( $Document ) or return undef;
+	$self->start_element( $Element );
+	foreach my $Child ( $Document->elements ) {
+		$self->_parse( $Child ) or return undef;
+	}
+	$self->end_element( $Element );
+
+	1;
+}
+
+sub _parse_token {
+	my $self  = shift;
+	my $Token = isa(ref $_[0], 'PPI::Token') ? shift : return undef;
+
+	# Support custom handlers
+	my $method = $self->_tag_method( $Token );
+	return $self->$method( $Token ) if $self->can($method);
+
+	# Generate the SAX2 events
+	my $Element = $self->_element( $Token ) or return undef;
+	$self->start_element( $Element );
+	$self->characters( {
+		Data => $Token->content,
+		} );
+	$self->end_element( $Element );
+
+	1;
+}
+
+sub _parse_statement {
+	my $self      = shift;
+	my $Statement = isa(ref $_[0], 'PPI::Statement') ? shift : return undef;
+
+	# Support custom handlers
+	my $method = $self->_tag_method( $Statement );
+	return $self->$method( $Statement ) if $self->can($method);
+
+	# Generate the SAX2 events
+	my $Element = $self->_element( $Statement ) or return undef;
+	$self->start_element( $Element );
+	foreach my $Child ( $Statement->elements ) {
+		$self->_parse( $Child ) or return undef;
+	}
+	$self->end_element( $Element );
+
+	1;
+}
+
+sub _parse_structure {
+	my $self      = shift;
+	my $Structure = isa(ref $_[0], 'PPI::Structure') ? shift : return undef;
+
+	# Support custom handlers
+	my $method = $self->_tag_method( $Structure );
+	return $self->$method( $Structure ) if $self->can($method);
+
+	# Generate the SAX2 events
+	my $Element = $self->_element( $Structure, {} ) or return undef;
+	$self->start_element( $Element );
+	foreach my $Child ( $Structure->elements ) {
+		$self->_parse( $Child ) or return undef;		
+	}
+	$self->end_element( $Element );
+
+	1;
+}
+
+
+
+
+
+#####################################################################
+# Support Methods
+
+# Strip out the Attributes for the end element
+sub end_element {
+	delete $_[1]->{Attributes};
+	shift->SUPER::end_element(@_);
+}
+
+# Auto-preparation of the text
+sub characters {
+	my $self = shift;
+	(ref $_[0])
+		? $self->SUPER::characters(shift)
+		: $self->SUPER::characters( {
+			Data => $self->_escape(shift),
+			} );
+}
+
+sub _tag_name {
+	my $tag  = lc ref $_[1];
+	$tag =~ s/::/_/g;
+	substr $tag, 4;
+}
+
+sub _tag_method {
+	my $tag = lc ref $_[1];
+	$tag =~ s/::/_/g;
+	'_parse_' . substr $tag, 4;
+}
+
+sub _element {
+	my $self      = shift;
+	my $LocalName = isa(ref $_[0], 'PPI::Element')
+		? $self->_tag_name(shift)
+		: $_[0]
+		or return undef;
+	my $attr = ref $_[0] eq 'HASH' ? shift : {};
+
+	# Localise some variables for speed
+	my $NamespaceURI = $self->{NamespaceURI};
+	my $Prefix       = $self->{Prefix} ? "$self->{Prefix}:" : '';
+
+	# Convert the attributes to the full version
+	my %Attributes = ();
+	foreach my $key ( keys %$attr ) {
+		$Attributes{"{$NamespaceURI}$key"} = {
+			Name         => $Prefix . $key,
+			NamespaceURI => $NamespaceURI,
+			Prefix       => $Prefix,
+			LocalName    => $key,
+			Value        => $attr->{$key},
+			};
+	}
+
+	# Create the main element
+	return {
+		Name         => $Prefix . $LocalName,
+		NamespaceURI => $NamespaceURI,
+		Prefix       => $Prefix,
+		LocalName    => $LocalName,
+		Attributes   => \%Attributes,
+		};
+}
+
+### Not sure if we escape here.
+### Just pass through for now.
+sub _escape { $_[1] }
 
 1;
 
@@ -150,7 +338,7 @@ sub parse {
 
 Design and create the PerlML Schema
 
-Complete the C<parse> method
+Make any changes needed to conform to it
 
 Write a bunch of tests
 

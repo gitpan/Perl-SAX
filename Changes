@@ -1,5 +1,8 @@
 Revision history for Perl extension Perl::SAX
 
-0.1  Tue Aug 31 2004
+0.03  Sat Sep 25 2004
+	- Filled out most stuff so it does actually generate XML now
+
+0.01  Tue Aug 31 2004
 	- Created the first placeholder version, containing as much
 	  working code as can be created without writing the PerlML schema.
