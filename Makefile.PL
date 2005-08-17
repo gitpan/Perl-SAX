@@ -1,22 +1,18 @@
-require 5.000;
-use ExtUtils::MakeMaker;
-WriteMakefile(
-	'NAME'         => 'Perl::SAX',
-	'VERSION_FROM' => 'lib/Perl/SAX.pm',
-	'PREREQ_PM'    => {
-		# Needed by Perl::SAX
-		'Class::Autouse'   => '1.04',
-		'XML::SAX::Base'   => '1.04',
-		'XML::SAX::Writer' => '0.44',
-		'PPI'              => '0.829', # Keep this current
+use inc::Module::Install;
 
-		# Needed by tests
-		'Test::More'       => '0.47',
-		'File::Spec'       => '0.83',
-		},
+name           ( 'Perl-SAX'                     );
+abstract       ( 'Generate SAX events for Perl Documents' );
+author         ( 'Adam Kennedy <cpan@ali.as>'   );
+version_from   ( 'lib/Perl/SAX.pm'              );
+license        ( 'perl'                         );
+requires       ( 'perl'             => '5.005'  );
+requires       ( 'XML::SAX::Base'   => '1.04'   );
+requires       ( 'XML::SAX::Writer' => '0.44'   );
+requires       ( 'PPI'              => '1.002'  );
+build_requires ( 'File::Spec'       => '0.80'   );
+build_requires ( 'Test::More'       => '0.47'   );
+no_index       ( directory          => 't.data' );
 
-	($] >= 5.005) ? (
-		'AUTHOR'   => 'Adam Kennedy (cpan@ali.as)',
-		'ABSTRACT' => 'Generate SAX events for perl source code',
-	) : (),
-);
+auto_install();
+
+&WriteAll;

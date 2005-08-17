@@ -12,8 +12,9 @@ BEGIN {
 	$| = 1;
 	unless ( $ENV{HARNESS_ACTIVE} ) {
 		require FindBin;
-		chdir ($FindBin::Bin = $FindBin::Bin); # Avoid a warning
-		lib->import( catdir( updir(), updir(), 'modules') );
+		$FindBin::Bin = $FindBin::Bin; # Avoid a warning
+		chdir catdir( $FindBin::Bin, updir() );
+		lib->import('blib', 'lib');
 	}
 }
 
@@ -21,17 +22,14 @@ use Test::More tests => 5;
 use PPI       ();
 use Perl::SAX ();
 
-use vars qw{$TESTDIR};
-BEGIN {
-	$TESTDIR = 't.data';
-}
+my $testfile = catfile( 't.data', '01_tiny.perl' );
 
 # Create a new, default, object
 my $Driver = Perl::SAX->new;
 isa_ok( $Driver, 'Perl::SAX' );
 
 # Load the test document
-my $Document = PPI::Document->load( catfile($TESTDIR, '01_tiny.perl') );
+my $Document = PPI::Document->new( $testfile );
 isa_ok( $Document, 'PPI::Document' );
 
 # Do the parsing

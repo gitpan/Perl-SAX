@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 
-# Formal testing for Perl::SAX
+# Compile testing for Perl::SAX
 
 # This test script only tests that all modules compile
 
@@ -12,17 +12,14 @@ BEGIN {
 	$| = 1;
 	unless ( $ENV{HARNESS_ACTIVE} ) {
 		require FindBin;
-		chdir ($FindBin::Bin = $FindBin::Bin); # Avoid a warning
-		lib->import( catdir( updir(), updir(), 'modules') );
+		$FindBin::Bin = $FindBin::Bin; # Avoid a warning
+		chdir catdir( $FindBin::Bin, updir() );
+		lib->import('blib', 'lib');
 	}
 }
 
 use Test::More tests => 2;
 use Class::Autouse ':devel'; # Load immediately
-
-
-
-
 
 # Check their perl version
 ok( $] >= 5.005, "Your perl is new enough" );

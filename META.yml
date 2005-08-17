@@ -1,16 +1,19 @@
-# http://module-build.sourceforge.net/META-spec.html
-#XXXXXXX This is a prototype!!!  It will change in the future!!! XXXXX#
-name:         Perl-SAX
-version:      0.03
-version_from: lib/Perl/SAX.pm
-installdirs:  site
-requires:
-    Class::Autouse:                1.04
-    File::Spec:                    0.83
-    PPI:                           0.829
-    Test::More:                    0.47
-    XML::SAX::Base:                1.04
-    XML::SAX::Writer:              0.44
-
+name: Perl-SAX
+version: 0.05
+abstract: Generate SAX events for Perl Documents
+author: Adam Kennedy <cpan@ali.as>
+license: perl
 distribution_type: module
-generated_by: ExtUtils::MakeMaker version 6.16
+build_requires:
+  File::Spec: 0.80
+  Test::More: 0.47
+requires:
+  perl: 5.005
+  XML::SAX::Base: 1.04
+  XML::SAX::Writer: 0.44
+  PPI: 1.002
+no_index:
+  directory:
+    - t.data
+    - inc
+generated_by: Module::Install version 0.36
