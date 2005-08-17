@@ -55,7 +55,7 @@ eval "use prefork 'XML::SAX::Writer';";
 
 use vars qw{$VERSION};
 BEGIN {
-	$VERSION = '0.05';
+	$VERSION = '0.06';
 }
 
 # While in development, use a version-specific namespace.
@@ -227,7 +227,9 @@ sub _parse_statement {
 
 	# Support custom handlers
 	my $method = $self->_tag_method( $Statement );
-	return $self->$method( $Statement ) if $self->can($method);
+	if ( $method ne '_parse_statement' and $self->can($method) ) {
+		return $self->$method( $Statement );
+	}
 
 	# Generate the SAX2 events
 	my $Element = $self->_element( $Statement ) or return undef;
@@ -246,7 +248,9 @@ sub _parse_structure {
 
 	# Support custom handlers
 	my $method = $self->_tag_method( $Structure );
-	return $self->$method( $Structure ) if $self->can($method);
+	if ( $self->can($method) and $method ne '_parse_structure' ) {
+		return $self->$method( $Structure );
+	}
 
 	# Generate the SAX2 events
 	my $Element = $self->_element( $Structure ) or return undef;

@@ -1,6 +1,9 @@
 Revision history for Perl extension Perl::SAX
 
-0.05  Sat Jun 25 2005
+0.06  Wed Aug 17 2005
+	- Fixed a major bug which caused infinite recursion in plain statements
+
+0.05  Wed Aug 17 2005
 	- Upgraded to use the new XML compatibility methods in PPI 0.994
 	- Converted back to Perl::SAX
 

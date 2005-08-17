@@ -38,6 +38,6 @@ ok( $Driver->parse( $Document ), '->parse returns true' );
 # Get the results
 my $Output = $Driver->{Output};
 ok( ref $Output eq 'SCALAR', 'SCALAR output found' );
-is( length $$Output, 459, 'Output is the correct length' );
+is( length $$Output, 793, 'Output is the correct length' );
 
 exit(0);
