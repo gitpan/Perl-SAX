@@ -1,19 +1,20 @@
+
+no_index: 
+  directory: 
+    - inc
+    - t
+generated_by: Module::Install version 0.62
+distribution_type: module
+version: 0.07
 name: Perl-SAX
-version: 0.06
-abstract: Generate SAX events for Perl Documents
 author: Adam Kennedy <cpan@ali.as>
 license: perl
-distribution_type: module
-build_requires:
-  File::Spec: 0.80
+build_requires: 
   Test::More: 0.47
-requires:
-  perl: 5.005
-  XML::SAX::Base: 1.04
-  XML::SAX::Writer: 0.44
+  File::Spec: 0.80
+requires: 
   PPI: 1.002
-no_index:
-  directory:
-    - t.data
-    - inc
-generated_by: Module::Install version 0.36
+  perl: 5.005
+  XML::SAX::Writer: 0.44
+  XML::SAX::Base: 1.04
+abstract: Generate SAX events for perl source code (incomplete)

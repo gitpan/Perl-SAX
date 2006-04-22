@@ -47,6 +47,7 @@ of an L<Acme::Bleach> rip-off using PerlML.
 
 =cut
 
+use 5.005;
 use strict;
 use base 'XML::SAX::Base';
 use Params::Util '_INSTANCE';
@@ -55,7 +56,7 @@ eval "use prefork 'XML::SAX::Writer';";
 
 use vars qw{$VERSION};
 BEGIN {
-	$VERSION = '0.06';
+	$VERSION = '0.07';
 }
 
 # While in development, use a version-specific namespace.
@@ -296,11 +297,15 @@ sub _element {
 	my $self      = shift;
 	my ($LocalName, $attr) = _INSTANCE($_[0], 'PPI::Element')
 		? ($_[0]->_xml_name, $_[0]->_xml_attr)
-		: ($_[0], (ref $_[1] eq 'HASH') ? $_[1] : {});
+		: ($_[0], (ref $_[1] eq 'HASH')
+			? $_[1]
+			: {} );
 
 	# Localise some variables for speed
 	my $NamespaceURI = $self->{NamespaceURI};
-	my $Prefix       = $self->{Prefix} ? "$self->{Prefix}:" : '';
+	my $Prefix       = $self->{Prefix}
+		? "$self->{Prefix}:"
+		: '';
 
 	# Convert the attributes to the full version
 	my %Attributes = ();
@@ -354,14 +359,18 @@ For other issues, or commercial enhancement or support, contact the author...
 
 =head1 AUTHOR
 
-Adam Kennedy, L<http://ali.as/>, cpan@ali.as
+Adam Kennedy E<lt>cpan@ali.asE<gt>
+
+=head1 SEE ALSO
+
+L<http://ali.as/>, L<PPI>, L<Acme::PerlML>
 
 =head1 COPYRIGHT
 
 Thank you to Phase N (L<http://phase-n.com/>) for permitting
 the Open Sourcing and release of this distribution.
 
-Copyright (c) 2004 - 2005 Adam Kennedy. All rights reserved.
+Copyright (c) 2004 - 2006 Adam Kennedy. All rights reserved.
 
 This program is free software; you can redistribute
 it and/or modify it under the same terms as Perl itself.
