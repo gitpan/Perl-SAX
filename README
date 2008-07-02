@@ -72,10 +72,10 @@ SUPPORT
     <http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Perl-SAX>
 
     For other issues, or commercial enhancement or support, contact the
-    author...
+    author.
 
 AUTHOR
-    Adam Kennedy <cpan@ali.as>
+    Adam Kennedy <adamk@cpan.org>
 
 SEE ALSO
     <http://ali.as/>, PPI, Acme::PerlML
@@ -84,7 +84,7 @@ COPYRIGHT
     Thank you to Phase N (<http://phase-n.com/>) for permitting the Open
     Sourcing and release of this distribution.
 
-    Copyright (c) 2004 - 2006 Adam Kennedy. All rights reserved.
+    Copyright 2004 - 2008 Adam Kennedy.
 
     This program is free software; you can redistribute it and/or modify it
     under the same terms as Perl itself.

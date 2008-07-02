@@ -49,14 +49,16 @@ of an L<Acme::Bleach> rip-off using PerlML.
 
 use 5.005;
 use strict;
-use base 'XML::SAX::Base';
-use Params::Util '_INSTANCE';
-use PPI::Util    '_Document';
+use Carp           'croak';
+use Params::Util   '_INSTANCE';
+use PPI::Util      '_Document';
+use XML::SAX::Base ();
 eval "use prefork 'XML::SAX::Writer';";
 
-use vars qw{$VERSION};
+use vars qw{$VERSION @ISA};
 BEGIN {
-	$VERSION = '0.07';
+	$VERSION = '0.08';
+	@ISA     = 'XML::SAX::Base';
 }
 
 # While in development, use a version-specific namespace.
@@ -162,7 +164,7 @@ sub Output       { $_[0]->{Output}       }
 # We only generate SAX events, we don't consume them.
 sub start_document {
 	my $class = ref $_[0] || $_[0];
-	die "$class can only be used as a SAX Driver";
+	croak "$class can only be used as a SAX Driver";
 }
 
 sub parse {
@@ -316,7 +318,7 @@ sub _element {
 			Prefix       => $Prefix,
 			LocalName    => $key,
 			Value        => $attr->{$key},
-			};
+		};
 	}
 
 	# Create the main element
@@ -326,7 +328,7 @@ sub _element {
 		Prefix       => $Prefix,
 		LocalName    => $LocalName,
 		Attributes   => \%Attributes,
-		};
+	};
 }
 
 ### Not sure if we escape here.
@@ -355,11 +357,11 @@ Bugs should be reported via the CPAN bug tracker at
 
 L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Perl-SAX>
 
-For other issues, or commercial enhancement or support, contact the author...
+For other issues, or commercial enhancement or support, contact the author.
 
 =head1 AUTHOR
 
-Adam Kennedy E<lt>cpan@ali.asE<gt>
+Adam Kennedy E<lt>adamk@cpan.orgE<gt>
 
 =head1 SEE ALSO
 
@@ -370,7 +372,7 @@ L<http://ali.as/>, L<PPI>, L<Acme::PerlML>
 Thank you to Phase N (L<http://phase-n.com/>) for permitting
 the Open Sourcing and release of this distribution.
 
-Copyright (c) 2004 - 2006 Adam Kennedy. All rights reserved.
+Copyright 2004 - 2008 Adam Kennedy.
 
 This program is free software; you can redistribute
 it and/or modify it under the same terms as Perl itself.
